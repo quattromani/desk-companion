@@ -4,10 +4,13 @@
  const PROOF_KEY='desk.pending-sign-in.v1';
  const status=document.getElementById('access-status'),signIn=document.getElementById('sign-in'),signOut=document.getElementById('sign-out');
  const locked=document.getElementById('locked'),desk=document.getElementById('private-desk');
- let credential=null,expiry=0,expiryTimer,refreshTimer,generation=0;
+ // View: signed out → viewing → revocation pending/failed → signed out.
+ // Local hiding and backend revocation are separate; failed revocation keeps only a retry credential.
+ let credential=null,expiry=0,expiryTimer,refreshTimer,generation=0,revocationPending=false;
  const base64=bytes=>btoa(String.fromCharCode(...new Uint8Array(bytes))).replaceAll('+','-').replaceAll('/','_').replaceAll('=','');
  const random=()=>base64(crypto.getRandomValues(new Uint8Array(32)));
- function clear(){credential=null;expiry=0;generation++;clearTimeout(expiryTimer);clearInterval(refreshTimer);document.getElementById('calendar-events').replaceChildren();document.getElementById('task-sources').replaceChildren();document.getElementById('snapshot-status').hidden=true;for(const id of ['snapshot-status','calendar-status','tasks-status'])document.getElementById(id).textContent='';desk.hidden=true;locked.hidden=false;signOut.hidden=true;signIn.hidden=false;}
+ function hidePrivate(){generation++;clearInterval(refreshTimer);document.getElementById('calendar-events').replaceChildren();document.getElementById('task-sources').replaceChildren();document.getElementById('snapshot-status').hidden=true;for(const id of ['snapshot-status','calendar-status','tasks-status'])document.getElementById(id).textContent='';desk.hidden=true;locked.hidden=false;}
+ function clear(){credential=null;expiry=0;revocationPending=false;clearTimeout(expiryTimer);hidePrivate();signOut.hidden=true;signOut.textContent='Sign out';signIn.hidden=false;}
  async function request(path,options={}){
   const response=await fetch(SERVICE+path,{...options,credentials:'omit',cache:'no-store',headers:{...(credential?{Authorization:'Bearer '+credential}:{}),...options.headers}});
   const body=await response.json();if(!response.ok){const error=Error(response.status===401?'Your session expired. Sign in to continue.':body.error||'Your desk is temporarily unavailable.');error.status=response.status;throw error;}return body;
@@ -51,7 +54,7 @@
   stamp.textContent=data.captured_at?'Last frame upload: '+dateTime(data.captured_at)+(Date.now()-data.captured_at>180000?' · Frame may be offline; showing its last saved copy.':' · Updates about once a minute.'):'Waiting for the first frame upload.';
   status.textContent='Signed in · read-only access.';
  }
- async function refresh(){if(document.hidden||!credential)return;try{await load();}catch(error){if(error.status===401)clear();status.textContent=error.status===401?error.message:'Web refresh failed. Showing the last loaded copy.';}}
+ async function refresh(){if(document.hidden||!credential||revocationPending)return;const current=generation;try{await load();}catch(error){if(current!==generation)return;if(error.status===401)clear();status.textContent=error.status===401?error.message:'Web refresh failed. Showing the last loaded copy.';}}
  signIn.addEventListener('click',async()=>{
   signIn.disabled=true;
   try{
@@ -63,8 +66,13 @@
  });
  signOut.addEventListener('click',async()=>{
   signOut.disabled=true;
+  revocationPending=true;hidePrivate();signIn.hidden=true;signOut.textContent='Retry sign out';
+  status.textContent='Private view closed. Revoking saved sign-in…';
   try{await request('/api/logout',{method:'POST'});clear();status.textContent='Signed out. Your saved backend session has been revoked.';}
-  catch{status.textContent='Could not finish signing out. Reconnect and try again to revoke this session.';}
+  catch{
+   if(!credential||Date.now()>=expiry){clear();status.textContent='Private view closed. Revocation could not be confirmed. Sign in again, then sign out to retry.';}
+   else{signOut.hidden=false;status.textContent='Private view closed. Could not revoke saved sign-in. Reconnect and select Retry sign out.';}
+  }
   finally{signOut.disabled=false;}
  });
  async function returned(){
@@ -79,14 +87,14 @@
   try{
    const result=await request('/auth/exchange',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:params.get('code'),verifier:pending.verifier})});
    credential=result.token;expiry=result.expires;
-   expiryTimer=setTimeout(()=>{clear();status.textContent='For your privacy, this view has expired. Sign in again to continue; your backend session may still be remembered.';},Math.max(0,expiry-Date.now()));
+   expiryTimer=setTimeout(()=>{const pending=revocationPending;clear();status.textContent=pending?'Private view closed. Revocation could not be confirmed. Sign in again, then sign out to retry.':'For your privacy, this view has expired. Sign in again to continue; your backend session may still be remembered.';},Math.max(0,expiry-Date.now()));
    await load();refreshTimer=setInterval(refresh,60000);
   }catch(error){clear();status.textContent=error.message;}
   finally{signIn.disabled=false;}
  }
  document.getElementById('desk-date').textContent=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',weekday:'long',month:'long',day:'numeric'}).format(new Date());
- document.addEventListener('visibilitychange',()=>{if(credential&&Date.now()>=expiry){clear();status.textContent='Your private viewing session expired. Sign in to continue.';}else if(!document.hidden)refresh();});
- window.addEventListener('pageshow',event=>{if(event.persisted){clear();status.textContent='Sign in to reopen your private desk.';}});
+ document.addEventListener('visibilitychange',()=>{if(credential&&Date.now()>=expiry){const pending=revocationPending;clear();status.textContent=pending?'Private view closed. Revocation could not be confirmed. Sign in again, then sign out to retry.':'Your private viewing session expired. Sign in to continue.';}else if(!document.hidden)refresh();});
+ window.addEventListener('pageshow',event=>{if(event.persisted){const pending=revocationPending;clear();status.textContent=pending?'Private view closed. Revocation could not be confirmed. Sign in again, then sign out to retry.':'Sign in to reopen your private desk.';}});
  clear();
  if(new URLSearchParams(location.hash.slice(1)).has('code'))returned();
  else {
