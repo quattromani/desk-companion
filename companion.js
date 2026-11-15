@@ -6,10 +6,10 @@
  const locked=document.getElementById('locked'),desk=document.getElementById('private-desk');
  // View: signed out → viewing → revocation pending/failed → signed out.
  // Local hiding and backend revocation are separate; failed revocation keeps only a retry credential.
- let credential=null,expiry=0,expiryTimer,refreshTimer,generation=0,revocationPending=false;
+ let credential=null,expiry=0,expiryTimer,refreshTimer,freshnessTimer,generation=0,requestSequence=0,revocationPending=false,lastSnapshot=null;
  const base64=bytes=>btoa(String.fromCharCode(...new Uint8Array(bytes))).replaceAll('+','-').replaceAll('/','_').replaceAll('=','');
  const random=()=>base64(crypto.getRandomValues(new Uint8Array(32)));
- function hidePrivate(){generation++;clearInterval(refreshTimer);document.getElementById('calendar-events').replaceChildren();document.getElementById('task-sources').replaceChildren();document.getElementById('snapshot-status').hidden=true;for(const id of ['snapshot-status','calendar-status','tasks-status'])document.getElementById(id).textContent='';desk.hidden=true;locked.hidden=false;}
+ function hidePrivate(){generation++;requestSequence++;lastSnapshot=null;clearInterval(refreshTimer);clearInterval(freshnessTimer);document.getElementById('calendar-events').replaceChildren();document.getElementById('task-sources').replaceChildren();document.getElementById('snapshot-status').hidden=true;for(const id of ['snapshot-status','calendar-status','tasks-status'])document.getElementById(id).textContent='';desk.hidden=true;locked.hidden=false;}
  function clear(){credential=null;expiry=0;revocationPending=false;clearTimeout(expiryTimer);hidePrivate();signOut.hidden=true;signOut.textContent='Sign out';signIn.hidden=false;}
  async function request(path,options={}){
   const response=await fetch(SERVICE+path,{...options,credentials:'omit',cache:'no-store',headers:{...(credential?{Authorization:'Bearer '+credential}:{}),...options.headers}});
@@ -46,15 +46,20 @@
    group.append(list);target.append(group);
   }
  }
+ function renderFreshness(){
+  if(!lastSnapshot||desk.hidden||revocationPending)return;
+  calendar(lastSnapshot.calendar);tasks(lastSnapshot.tasks);
+  const stamp=document.getElementById('snapshot-status');
+  stamp.textContent=lastSnapshot.captured_at?'Last frame upload: '+dateTime(lastSnapshot.captured_at)+(Date.now()-lastSnapshot.captured_at>180000?' · Frame may be offline; showing its last saved copy.':' · Updates about once a minute.'):'Waiting for the first frame upload.';
+ }
  async function load(){
-  const current=generation;const data=await request('/api/home');if(current!==generation||!credential||Date.now()>=expiry)return;
-  calendar(data.calendar);tasks(data.tasks);
+  const current=generation,sequence=++requestSequence;const data=await request('/api/home');if(current!==generation||sequence!==requestSequence||!credential||Date.now()>=expiry||revocationPending)return;
+  lastSnapshot=data;
   locked.hidden=true;desk.hidden=false;signIn.hidden=true;signOut.hidden=false;
-  const stamp=document.getElementById('snapshot-status');stamp.hidden=false;
-  stamp.textContent=data.captured_at?'Last frame upload: '+dateTime(data.captured_at)+(Date.now()-data.captured_at>180000?' · Frame may be offline; showing its last saved copy.':' · Updates about once a minute.'):'Waiting for the first frame upload.';
+  document.getElementById('snapshot-status').hidden=false;renderFreshness();
   status.textContent='Signed in · read-only access.';
  }
- async function refresh(){if(document.hidden||!credential||revocationPending)return;const current=generation;try{await load();}catch(error){if(current!==generation)return;if(error.status===401)clear();status.textContent=error.status===401?error.message:'Web refresh failed. Showing the last loaded copy.';}}
+ async function refresh(){if(document.hidden||!credential||revocationPending)return;renderFreshness();const current=generation,sequence=requestSequence+1;try{await load();}catch(error){if(current!==generation||sequence!==requestSequence)return;if(error.status===401)clear();status.textContent=error.status===401?error.message:'Web refresh failed. Showing the last loaded copy.';}}
  signIn.addEventListener('click',async()=>{
   signIn.disabled=true;
   try{
@@ -88,7 +93,7 @@
    const result=await request('/auth/exchange',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:params.get('code'),verifier:pending.verifier})});
    credential=result.token;expiry=result.expires;
    expiryTimer=setTimeout(()=>{const pending=revocationPending;clear();status.textContent=pending?'Private view closed. Revocation could not be confirmed. Sign in again, then sign out to retry.':'For your privacy, this view has expired. Sign in again to continue; your backend session may still be remembered.';},Math.max(0,expiry-Date.now()));
-   await load();refreshTimer=setInterval(refresh,60000);
+   await load();refreshTimer=setInterval(refresh,60000);freshnessTimer=setInterval(renderFreshness,30000);
   }catch(error){clear();status.textContent=error.message;}
   finally{signIn.disabled=false;}
  }
