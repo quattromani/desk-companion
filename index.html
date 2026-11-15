@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow, noarchive"><meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; font-src 'self'; img-src data:; script-src 'self'; connect-src https://homehq-desk-companion.homehq-private-desk.workers.dev; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta name="color-scheme" content="dark"><title>Desk companion</title>
+  <link rel="icon" href="data:,"><link rel="stylesheet" href="desk-system.css"><link rel="stylesheet" href="companion.css">
+  <script src="companion.js" defer></script>
+</head>
+<body>
+  <header class="companion-header"><a class="companion-brand" href="./">Desk companion</a><span>Read-only workspace</span></header>
+  <main class="companion-main">
+    <p class="eyebrow">Away from the desk</p><h1 id="desk-date">Your desk</h1>
+    <p id="access-status" role="status">Sign in to view your private desk.</p>
+    <section id="locked" class="companion-card" aria-labelledby="access-title">
+      <h2 id="access-title">Your desk stays private.</h2>
+      <p>Use your GitHub account to sign in. Access is restricted to the owner. Your calendar and tasks are never included in this public page.</p>
+      <button id="sign-in" type="button">Sign in with GitHub <span aria-hidden="true">↗</span></button>
+      <p class="companion-note">Your personal browser can remember sign-in for up to seven days. Each private viewing session lasts five minutes.</p>
+    </section>
+    <div id="private-desk" class="companion-grid" hidden>
+      <section class="companion-card" aria-labelledby="calendar-title"><h2 id="calendar-title">Appointments</h2><p>The frame’s calendar is not connected to the web yet.</p><p class="companion-note">Unavailable · no appointment data loaded</p></section>
+      <section class="companion-card" aria-labelledby="tasks-title"><h2 id="tasks-title">Keep in focus</h2><p>The frame’s tasks are not connected to the web yet.</p><p class="companion-note">Unavailable · no task data loaded</p></section>
+    </div>
+    <button id="sign-out" type="button" hidden>Sign out</button>
+    <noscript><p>Enable JavaScript to use secure sign-in. No personal records are loaded without it.</p></noscript>
+  </main>
+  <footer class="companion-footer">Desk companion · America/Chicago</footer>
+</body>
+</html>

@@ -1,0 +1,328 @@
+/* Graphite Desk appearance, adopted by the owner from the isolated Full Unslop trial.
+   app.css owns view structure; this file owns appearance tokens and component treatment.
+   Adapted from Unslop by Damir Sokolovsky (@heydamir), CC BY 4.0.
+   See design/graphite-desk-system.md for provenance and constraints. */
+@font-face {
+  font-family: 'IBM Plex Sans'; font-style: normal; font-weight: 400 500;
+  font-display: swap; src: url('fonts/ibm-plex-sans-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: 'IBM Plex Sans'; font-style: normal; font-weight: 400 500;
+  font-display: swap; src: url('fonts/ibm-plex-sans-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+/* One graphite ramp, the retained gold identity, and separate semantic signals. */
+:root {
+  --bg: #161617;
+  --rail: #101011;
+  --surface: #1e1e20;
+  --soft: #252527;
+  --ink: #efeeeb;
+  --muted: #b0b0b3;
+  --quiet: #a1a1a6;
+  --line: #343436;
+  --focus-surface: #252527;
+  --dial-track: #303033;
+  --red: #df938c;
+  --signal-green: #62cc93;
+  --blue: #5b8cbd;
+  --green: #7eab90;
+  --amber: #e4be78;
+  --identity-gold: #d4b879;
+  --radius: 16px;
+  font-family: 'IBM Plex Sans', Arial, sans-serif;
+  font-size: 17px;
+  color-scheme: dark;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+button, input, select, textarea { font-family: inherit; }
+strong, b { font-weight: 500; }
+button { border-color: #555559; border-radius: 8px; }
+button.primary { font-weight: 500; }
+button:hover:not(:disabled) { border-color: var(--quiet); }
+button:focus-visible, a:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible, [tabindex='0']:focus-visible {
+  outline-color: var(--identity-gold);
+}
+h1, h2, h3 { letter-spacing: 0; font-weight: 500; }
+h1 { font-size: 36px; line-height: 1.15; font-weight: 400; }
+.eyebrow, .badge, .desk-location, .pomodoro-widget-heading,
+.photo-caption small, .weather-day-strip button > span {
+  text-transform: none; letter-spacing: 0;
+}
+.eyebrow, .badge { font-size: 13px; }
+
+/* Labeled navigation trades some width for immediately recognizable destinations. */
+.rail { width: 216px; padding: 24px 12px 112px; border-right: 1px solid var(--line); }
+.brand { margin-left: 4px; box-shadow: none; }
+.desk-brand { position: absolute; left: 84px; top: 30px; line-height: 1.25; }
+.desk-brand strong { display: block; font-size: 17px; font-weight: 500; color: var(--ink); }
+.desk-brand span { display: block; font-size: 12px; color: var(--muted); margin-top: 4px; }
+.brand-rule { margin: 24px 4px 24px; }
+#navigation { gap: 4px; }
+#navigation button, .settings-control, .visitor-control {
+  display: flex; align-items: center; justify-content: flex-start;
+  width: 192px; height: 48px; min-height: 48px; padding: 0 16px;
+  gap: 12px; border: 1px solid transparent; border-radius: 8px;
+  color: var(--muted); background: transparent; font-size: 16px;
+}
+#navigation button[aria-current], .settings-control[aria-current] {
+  padding: 0 16px; color: var(--ink); font-weight: 500;
+  background: var(--soft); background-image: none;
+  border-color: var(--line); border-left: 2px solid var(--identity-gold);
+  border-radius: 8px;
+}
+#navigation button[aria-current]::before, #navigation button[aria-current]::after,
+.settings-control[aria-current]::before, .settings-control[aria-current]::after { display: none; }
+.rail .nav-icon, .settings-control svg {
+  display: block; width: 20px; height: 20px; flex-shrink: 0; stroke-width: 1.5;
+}
+.rail .nav-tip {
+  position: static; display: block; opacity: 1; padding: 0;
+  color: inherit; background: none; border: 0; pointer-events: none;
+  font: inherit; line-height: 1.3; white-space: nowrap;
+}
+.rail-bottom { left: 12px; right: 12px; bottom: 176px; }
+.settings-control { left: 12px; bottom: 112px; }
+.visitor-control { border: 1px solid transparent; }
+#navigation button:hover, .settings-control:hover, .visitor-control:hover { background: var(--surface); }
+
+.workspace { margin-left: 216px; padding: 24px 28px 0; }
+.topbar { height: 84px; align-items: flex-start; padding-top: 4px; }
+.desk-location { font-size: 13px; color: var(--muted); margin-bottom: 8px; line-height: 16px; }
+.home-view .desk-location { display: none; }
+.clock #clock { font-size: 48px; line-height: 1; font-weight: 400; letter-spacing: -.5px; }
+#clock-period { font-size: 13px; color: var(--muted); }
+.clock .desk-date { color: var(--muted); margin-top: 8px; font-size: 14px; }
+#view-title > .desk-date {
+  display: block; margin: 0; color: var(--ink); font: inherit;
+  line-height: inherit; letter-spacing: inherit;
+}
+.desk-footer { color: var(--muted); }
+
+/* The workday remains the first content block and its dial becomes the main graphic. */
+.home-view #content { margin-top: 0; padding: 24px 0 0; }
+.home-view .today-layout {
+  grid-template-columns: minmax(0, 1fr) 260px; gap: 24px; height: calc(100% - 12px);
+}
+.home-view .today-work { grid-template-rows: 164px minmax(0, 1fr) 180px; gap: 24px; }
+.home-view .day-overview { gap: 16px; padding-bottom: 12px; }
+.home-view .day-overview .eyebrow { margin-bottom: 8px; }
+.home-view .day-overview h2 { font-size: 36px; font-weight: 400; letter-spacing: -.5px; }
+.home-view .day-gap-summary { color: var(--ink); font-size: 15px; padding: 8px 0; }
+.home-view #day-overview-note { color: var(--quiet); font-size: 12px; line-height: 16px; }
+.home-view .day-dial-slot, .home-view .meeting-glance { width: 136px; height: 136px; }
+.day-dial-hour { fill: var(--muted); font-family: 'IBM Plex Sans', Arial, sans-serif; }
+.day-dial-value { fill: var(--ink); font-family: 'IBM Plex Sans', Arial, sans-serif; font-weight: 500; }
+.home-view .day-focus-slot { flex: 0 0 173px; padding-left: 20px; }
+.home-view .day-focus-slot .pomodoro-widget {
+  width: 152px; height: 148px; padding: 12px; border: 1px solid var(--line);
+  border-radius: 16px; background: var(--surface); color: var(--ink);
+}
+.home-view .day-focus-slot .pomodoro-widget-heading {
+  color: var(--muted); font-size: 12px; line-height: 16px;
+}
+.home-view .day-focus-slot .pomodoro-widget-dial { margin: 4px 0 8px; }
+.home-view .day-focus-slot .pomodoro-home-time {
+  font-size: 36px; font-weight: 400; letter-spacing: 0; font-variant-numeric: tabular-nums;
+}
+.home-view .day-focus-slot .pomodoro-widget-start {
+  min-height: 36px; line-height: 36px; padding: 0 12px;
+  background: var(--ink); color: var(--rail); font-size: 13px; font-weight: 500; border-radius: 4px;
+}
+.home-view .day-focus-slot .pomodoro-widget-footer {
+  margin-top: 8px; font-size: 12px; line-height: 16px; gap: 8px; color: var(--muted);
+}
+.home-view .day-focus-slot .pomodoro-dots > span { border-color: var(--muted); }
+.home-view .day-focus-slot .pomodoro-dots > span.filled { background: var(--ink); border-color: var(--ink); }
+.home-view .day-focus-slot .focus-progress { width: 100%; }
+.home-view .day-focus-slot .focus-progress path { stroke: var(--line); }
+.home-view .day-focus-slot .focus-progress #quick-pomodoro-progress { stroke: var(--ink); }
+.home-view .upcoming-card { display: flex; flex-direction: column; min-height: 0; }
+.home-view .upcoming-card .heading { flex: 0 0 44px; }
+.home-view .home-agenda { flex: 1; height: auto; min-height: 0; }
+.home-view .home-event { gap: 12px; grid-template-columns: 68px minmax(0, 1fr) minmax(0, 136px) 18px; min-height: 52px; padding: 4px 0; }
+.home-view .event-name { padding-left: 12px; }
+.home-view .event-name strong { font-weight: 400; }
+.home-view .event-name small, .home-view .event-context { color: var(--muted); }
+.home-view .focus-priorities { gap: 24px; }
+.home-view .priority { gap: 12px; font-size: 16px; min-height: 40px; }
+.home-view .priority-number { color: var(--quiet); font-size: 12px; }
+.home-view .alerts-panel { padding-left: 24px; }
+.home-view .alerts-panel .heading { height: 36px; }
+.home-view .alert-headline { gap: 12px; min-height: 56px; }
+.home-view .alert-headline strong { font-size: 14px; line-height: 18px; max-height: 36px; }
+.home-view .alert-headline small, .home-view .alert-status { font-size: 11px; line-height: 14px; color: var(--quiet); }
+.home-view .alert-thumbnail { width: 40px; height: 40px; flex-basis: 40px; }
+.home-view .alert-thumbnail svg { left: 9px; top: 9px; }
+
+/* Weather becomes a reading instrument; the photograph carries natural color. */
+.home-view .today-ambient { grid-template-rows: 236px minmax(0, 1fr); gap: 24px; }
+.weather-widget { background: var(--surface); border: 1px solid var(--line); color: var(--ink); }
+.weather-art { display: none; }
+.weather-home.weather-widget { height: 236px; }
+.weather-home .weather-widget-main { padding: 16px 20px 8px; }
+.weather-widget-condition, .weather-widget-location, .weather-open { color: var(--muted); }
+.weather-home .weather-widget-condition { font-size: 14px; }
+.weather-home .weather-widget-reading { margin-top: 8px; }
+.weather-home .weather-big-temperature { font-size: 64px; letter-spacing: -1px; font-weight: 400; }
+.weather-home .weather-widget-range { font-size: 14px; color: var(--muted); }
+.weather-widget-reading .weather-uv-gauge > .uv-label { color: var(--muted); }
+.weather-home .weather-widget-status { left: 20px; font-size: 12px; color: var(--quiet); }
+.weather-day-strip { background: var(--rail); border-top: 1px solid var(--line); }
+.weather-day-strip button { color: var(--muted); background: transparent; }
+.weather-day-strip button[aria-pressed='true'] { color: var(--ink); background: var(--soft); box-shadow: inset 0 -2px var(--identity-gold); }
+.weather-day-strip button > span { font-size: 13px; }
+.weather-day-strip strong { font-weight: 500; }
+.weather-day-strip small { color: var(--muted); }
+.photo-home { border-radius: 16px; }
+.photo-caption { padding: 48px 20px 20px; background: linear-gradient(transparent, #000b); font-size: 18px; font-weight: 500; }
+.photo-caption small { font-size: 12px; line-height: 16px; margin-bottom: 8px; }
+.weather-icon { filter: saturate(.3); }
+
+/* Shared controls, references, and report chrome use the same neutral roles. */
+dialog { background: var(--surface); border-color: var(--line); border-radius: 16px; }
+input, select, textarea { background-color: var(--surface); border-color: #555559; color: var(--ink); }
+.notice, .source, .visitor-source, .detail-section { border-color: var(--line); }
+summary { color: var(--ink); }
+summary:focus-visible, .todoist-stack:focus-visible { outline-color: var(--identity-gold); }
+.agenda-row time, .agenda-row .small, .date-chip,
+.side-stack .small, .report-sections button, .metric-controls button,
+.report-kpi > span, .report-inline-actions, .report-highlight > span:last-child,
+.chart-legend, .data-table th, .ratio-table th, .mix-row small,
+.glossary-count, .glossary-pages span, .glossary-card > small,
+.reference-hit > span, .reference-count, .reference-source,
+.event-location, .event-countdown { color: var(--muted); }
+.report-sections button[aria-pressed=true], .metric-controls button[aria-pressed=true],
+.settings-tabs button[aria-pressed=true], .glossary-source-row button[aria-pressed=true],
+.glossary-letters button[aria-pressed=true], .pomodoro-modes button[aria-pressed=true] {
+  color: var(--ink); background: var(--soft); border-color: var(--identity-gold);
+}
+.report-tabs button { background: var(--soft); box-shadow: inset 0 -2px var(--identity-gold); }
+.report-chart text { fill: var(--muted); font-family: 'IBM Plex Sans', Arial, sans-serif; }
+.chart-grid { stroke: var(--line); }
+.mix-track { background: var(--soft); }
+.study-answer { border-color: var(--identity-gold); }
+.glossary-card > small { letter-spacing: 0; font-size: 12px; }
+
+/* Focus and Photos are full-screen members of the same system. */
+.pomodoro-stage-header h1 { text-transform: none; letter-spacing: 0; font-size: 18px; font-weight: 500; }
+.pomodoro-time { font-weight: 400; letter-spacing: -.02em; }
+.pomodoro-status, .pomodoro-round, .pomodoro-modes button { color: var(--muted); }
+.pomodoro-controls .pomodoro-start { background: var(--ink); border-color: var(--ink); color: var(--rail); }
+.pomodoro-round .pomodoro-dots > span.filled { background: var(--ink); border-color: var(--ink); }
+.photo-stage { background: var(--rail); }
+.photo-overlay { background: linear-gradient(transparent, #000e); color: var(--ink); }
+.photo-controls button, .photo-controls select, .photo-album-actions button {
+  background: #101011e6; border-color: #555559; color: var(--ink);
+}
+.photo-album-status { color: var(--ink); }
+.photo-album-actions > span { color: var(--muted); }
+.weather-widget-reading > div > span, .weather-selected-date { color: var(--muted); }
+.weather-big-temperature { font-weight: 400; }
+.weather-source-row, .weather-detail-values small { color: var(--muted); }
+
+/* Visitor is public-facing: retain its evidence, distinctions, and plain explanation. */
+#visitor { background: var(--bg); padding: 24px 48px; }
+.visitor-header { border-color: var(--line); }
+.visitor-header .eyebrow { color: var(--identity-gold); font-size: 13px; letter-spacing: 0; }
+#visitor-title { font-size: 36px; font-weight: 400; letter-spacing: 0; margin: 8px 0; }
+.visitor-welcome { color: var(--muted); font-size: 18px; }
+#visitor-clock { font-size: 48px; font-weight: 400; letter-spacing: -.5px; }
+#visitor-date { color: var(--muted); font-size: 14px; margin-top: 8px; }
+.visitor-report-heading h2 { font-size: 28px; font-weight: 400; }
+.visitor-report-heading > p { color: var(--muted); }
+.visitor-class-grid { gap: 24px; }
+.visitor-class {
+  border: 1px solid var(--line); background: var(--surface);
+  padding: 20px 24px; border-radius: 16px;
+}
+.visitor-class h3 { font-size: 22px; font-weight: 500; }
+.visitor-level { color: var(--ink); font-size: 64px; font-weight: 400; letter-spacing: -.02em; }
+.visitor-level span { color: var(--ink); font-size: 32px; }
+.visitor-level-label, .visitor-statistics dt, .visitor-sample { color: var(--muted); }
+.visitor-statistics { border-color: var(--line); }
+.visitor-sample { white-space: normal; font-size: 12px; line-height: 16px; }
+.visitor-explanations { gap: 24px; }
+.visitor-explanations h3 { font-weight: 500; }
+.visitor-explanations p { color: var(--muted); font-size: 15px; }
+.visitor-source { color: var(--quiet); }
+.visitor-footer { border-color: var(--line); }
+.visitor-footer span { color: var(--muted); }
+.visitor-footer button { background: var(--ink); color: var(--rail); border-color: var(--ink); }
+
+@media (max-width: 1150px) {
+  .rail { width: 192px; }
+  .workspace { margin-left: 192px; padding-left: 24px; padding-right: 24px; }
+  #navigation button, .settings-control, .visitor-control { width: 168px; }
+  .desk-brand { left: 80px; }
+  .home-view .today-layout { grid-template-columns: minmax(0, 1fr) 236px; gap: 20px; }
+}
+
+/* Source labels replace row numbers within the existing Focus footprint. */
+.todoist-card { --task-assessor: #f9a051; --task-personal: #9fbce8; height: 175px; display: flex; flex-direction: column; }
+.todoist-card .heading { height: 24px; flex-shrink: 0; }
+.todoist-card .todoist-stack { height: 120px; max-height: 120px; flex-shrink: 0; }
+.todoist-card .todoist-status { margin-top: 4px; max-height: 16px; flex-shrink: 0; }
+.todoist-card .todoist-feedback { flex-shrink: 0; }
+.todoist-card.todoist-has-feedback .todoist-stack { height: 86px; max-height: 86px; }
+.home-view .todoist-row { min-height: 44px; padding: 4px 0; line-height: 20px; }
+.todoist-row input { flex-shrink: 0; margin-top: 2px; }
+.todoist-source { flex: 0 0 53px; text-align: right; font-size: 11px; line-height: 20px; }
+.todoist-source-assessor { color: var(--task-assessor); }
+.todoist-source-personal { color: var(--task-personal); }
+.todoist-source small { display: block; font-size: 11px; line-height: 12px; }
+
+/* Desk convenience controls use the existing surface and typographic roles. */
+#display-sleep { position:fixed; inset:0; width:100%; height:100%; z-index:10000; border:0; border-radius:0; padding:0; background:#000; color:#fff; cursor:pointer; }
+#display-sleep[hidden] { display:none; }
+#display-sleep:focus-visible { outline:2px solid #aaa; outline-offset:-4px; }
+.home-view .upcoming-reminder { flex:0 0 46px; display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:12px; width:100%; min-height:46px; padding:6px 0; border:0; border-top:1px solid var(--line); border-radius:0; background:transparent; text-align:left; font-size:12px; }
+.upcoming-reminder strong { font-size:14px; font-weight:400; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.upcoming-reminder > span { color:var(--muted); }
+.important-date-row { padding:12px 0; border-bottom:1px solid var(--line); }
+.important-date-row > strong, .important-date-row > span { display:block; }
+.important-date-row > strong { font-size:15px; font-weight:500; }
+.important-date-row p { margin:4px 0 0; }
+.important-dates-panel > p { margin:8px 0; }
+.important-dates-panel a { display:inline-block; min-height:44px; padding:10px 0; }
+.desk-tools-grid .backup-settings { grid-column:1 / -1; }
+.desk-tools-grid form { margin-top:12px; }
+.desk-tools-grid form > button { min-height:48px; margin-top:12px; }
+.desk-tools-grid label { font-size:14px; }
+.desk-tools-grid .check-label { margin-bottom:12px; }
+.desk-tools-grid .small { font-size:13px; line-height:1.5; }
+.desk-tools-grid input:not([type=checkbox]) { min-height:48px; }
+.desk-tools-grid .actions { flex-wrap:wrap; }
+.settings-tabs { flex-wrap:wrap; }
+@media(max-width:1050px) { .upcoming-reminder > span:last-child { display:none; } }
+
+.desk-tools-grid button { min-height:48px; }
+
+#display-sleep { margin:0; max-width:none; max-height:none; }
+#display-sleep > button { position:absolute; inset:0; width:100%; height:100%; border:0; border-radius:0; background:#000; color:#fff; }
+#display-sleep::backdrop { background:#000; }
+
+.important-dates-panel .small { font-size:13px; line-height:1.5; }
+
+/* The whole vocabulary card opens the shared details dialog. */
+.home-view .word-panel { position: relative; min-width: 0; padding: 8px 0 0 24px; border-left: 1px solid var(--line); display: flex; flex-direction: column; overflow: hidden; }
+.word-panel .heading { margin: 0; min-height: 24px; height: 24px; }
+.word-panel h2 { font-size: 15px; font-weight: 500; }
+.word-expand { color: var(--muted); }
+.word-copy { flex: 1; min-height: 0; overflow: hidden; padding-right: 8px; }
+.word-panel .daily-word { font-size: 25px; line-height: 1.15; margin: 2px 0 5px; overflow-wrap: anywhere; }
+.word-panel .word-pronunciation { color: var(--muted); font-size: 12px; margin: 0 0 8px; }
+.word-panel .word-definition, .word-panel .word-empty { font-size: 14px; line-height: 1.4; margin: 0; }
+.word-panel .word-definition { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.word-panel .word-status { color: var(--muted); font-size: 11px; margin: 6px 0 0; flex-shrink: 0; }
+.word-panel .word-open { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; border-radius: 0; background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.word-panel .word-open:focus-visible { outline: 2px solid var(--muted); outline-offset: -2px; }
+.word-details .daily-word { font-size: 32px; line-height: 1.2; overflow-wrap: anywhere; }
+.word-full-definition { line-height: 1.6; }
+.word-modal-sources { display: flex; flex-wrap: wrap; gap: 8px 24px; margin-top: 20px; }
+.word-modal-sources a { display: inline-flex; align-items: center; min-height: 48px; }

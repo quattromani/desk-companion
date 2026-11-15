@@ -1,0 +1,18 @@
+body { margin: 0; min-height: 100vh; }
+[hidden] { display: none !important; }
+button { min-height: 48px; padding: .75rem 1rem; border: 1px solid var(--line); border-radius: 8px; background: var(--soft); color: var(--ink); cursor: pointer; font-size: 1rem; }
+button:hover { border-color: var(--identity-gold); }
+button:focus-visible, a:focus-visible { outline: 3px solid var(--identity-gold); outline-offset: 4px; }
+button:disabled { opacity: .6; cursor: wait; }
+.companion-brand { text-decoration: none; }
+.companion-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,20rem),1fr)); gap: 1rem; margin-bottom: 2rem; }
+.companion-header { display: flex; justify-content: space-between; gap: 1rem; padding: 1.25rem clamp(1rem, 5vw, 4rem); border-bottom: 1px solid var(--line); color: var(--muted); }
+.companion-brand { color: var(--identity-gold); }
+.companion-main { max-width: 54rem; margin: 0 auto; padding: clamp(2rem, 8vw, 6rem) 1.25rem; }
+.companion-main h1 { max-width: 22ch; font-size: clamp(2rem, 6vw, 3.5rem); line-height: 1.15; text-wrap: balance; }
+.companion-card { margin-top: 2.5rem; padding: clamp(1.25rem, 4vw, 2rem); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.companion-card h2 { margin-top: 0; font-size: 1.3rem; }
+.companion-card p { max-width: 60ch; line-height: 1.65; text-wrap: pretty; }
+.companion-note, .companion-footer { color: var(--muted); font-size: .9rem; }
+.companion-footer { padding: 1.25rem; text-align: center; }
+@media (max-width: 360px) { .companion-header { flex-direction: column; gap: .4rem; } }
